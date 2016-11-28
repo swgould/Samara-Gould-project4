@@ -1,1 +1,2 @@
-"This is my project"
+print "This is my project"
+
