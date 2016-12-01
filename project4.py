@@ -54,7 +54,7 @@ class Ball(Breakout_Sprite):
 
     def update(self):
         self.rect = self.rect.move(self.speed_x, self.speed_y)
-        pygame.mixer.Sound.play(crash_sound)
+        #pygame.mixer.Sound.play(crash_sound)
 
         if self.rect.x > WINDOW_WIDTH - self.image.get_width() or self.rect.x < 0:
             self.speed_x *= -1
