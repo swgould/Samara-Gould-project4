@@ -9,23 +9,24 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 640, 480
 BALL_WIDTH, BALL_HEIGHT = 20, 20
 BRICK_WIDTH, BRICK_HEIGHT = 64, 16
 PLAYER_WIDTH, PLAYER_HEIGHT = 64, 16
-PLAYER_SPEED = 10
-BALL_SPEED = 3
+PLAYER_SPEED = 20
+BALL_SPEED = 2
 
-class Breakout_Sprite(pygame.sprite.Sprite):
+class Initial_Sprite(pygame.sprite.Sprite):
 
     def __init__(self, image_file):
         pygame.sprite.Sprite.__init__(self)
 
-        # load image & rect
-        self.image = pygame.image.load('images/' + image_file).convert()
+        # load image & rect#
+        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/ball.bmp')
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
 
-class Player(Breakout_Sprite):
+class Player(Initial_Sprite):
 
     def __init__(self, image_file):
-        Breakout_Sprite.__init__(self, image_file)
+        Initial_Sprite.__init__(self, image_file)
+        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/player.bmp')
         self.rect.bottom = WINDOW_HEIGHT
         self.rect.left = (WINDOW_WIDTH - self.image.get_width()) / 2
 
@@ -37,17 +38,19 @@ class Player(Breakout_Sprite):
         if self.rect.right < WINDOW_WIDTH:
             self.rect.move_ip(PLAYER_SPEED, 0)
 
-class Brick(Breakout_Sprite):
+class Brick(Initial_Sprite):
   
     def __init__(self, image_file, x, y):
-        Breakout_Sprite.__init__(self, image_file)
+        Initial_Sprite.__init__(self, image_file)
+        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/brick.bmp')
         self.rect.x, self.rect.y = x, y
 
-class Ball(Breakout_Sprite):
+class Ball(Initial_Sprite):
 
     def __init__(self, image_file, speed_x, speed_y):
-        Breakout_Sprite.__init__(self, image_file)
+        Initial_Sprite.__init__(self, image_file)
         self.rect.bottom = WINDOW_HEIGHT - PLAYER_HEIGHT
+        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/ball.bmp')
         self.rect.left = WINDOW_WIDTH / 2
         self.speed_x = speed_x
         self.speed_y = speed_y
@@ -82,13 +85,13 @@ bricks_group = pygame.sprite.Group()
 ball = Ball('ball.png', BALL_SPEED, -BALL_SPEED)
 all_sprites_group.add(ball)
 
-player = Player('player.png')
+player = Player('player.bmp')
 all_sprites_group.add(player)
 player_bricks_group.add(player)
 
 for i in range(8):
     for j in range(8):
-        brick = Brick('brick.png', (i+1)*BRICK_WIDTH + 5, (j+3)*BRICK_HEIGHT + 5)
+        brick = Brick('brick.bmp', (i+1)*BRICK_WIDTH + 5, (j+3)*BRICK_HEIGHT + 5)
         all_sprites_group.add(brick)
         bricks_group.add(brick)
         player_bricks_group.add(brick)
