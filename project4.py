@@ -73,16 +73,26 @@ score = 0
 
 
 all_sprites_group = pygame.sprite.Group()
+
 player_bricks_group = pygame.sprite.Group()
 bricks_group = pygame.sprite.Group()
+
+player_ball_group = pygame.sprite.Group()
 
 
 ball = Ball('ball.png', ball_speed, -ball_speed)
 all_sprites_group.add(ball)
 
+player_ball_group.add(ball)
+
 player = Player('player.bmp')
 all_sprites_group.add(player)
 player_bricks_group.add(player)
+
+player_ball_group.add(player)
+
+
+
 
 for i in range(8):
     for j in range(8):
@@ -112,27 +122,36 @@ while True:
 
     
     hits = pygame.sprite.spritecollide(ball, player_bricks_group, False)
+    
+
+    
     if hits:
         hit_rect = hits[0].rect
 
-        
         if hit_rect.left > ball.rect.left or ball.rect.right < hit_rect.right:
             ball.speed_y *= -1
         else:
             ball.speed_x *= -1
 
-        
         if pygame.sprite.spritecollide(ball, bricks_group, True):
             score += len(hits)
             sound = pygame.mixer.Sound('alert.wav')
             sound.play()
             print ("Score: %s" % score)
 
-    
+
     window.fill((0, 0, 0))
     all_sprites_group.draw(window)
 
     
     all_sprites_group.update()
+    player_hits = pygame.sprite.spritecollide(ball, all_sprites_group, True)
+    if player_hits:
+        player_hit_rect = player_hits[0].rect
+        if player_hit_rect.left > ball.rect.left or ball.rect.right < player_hit_rect.right:
+            ball.speed_y *= 1
+        else:
+            ball.speed_x *= 1
+
     clock.tick(60)
     pygame.display.flip()
