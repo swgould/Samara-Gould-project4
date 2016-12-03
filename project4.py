@@ -1,157 +1,144 @@
 import pygame
-from pygame.locals import *
-import sys
-import os
+import random 
 
-
-window_width, window_height = 640, 480
-ball_width, ball_height = 20, 20
-brick_width, brick_height = 64, 16
-player_width, player_height = 64, 16
-player_speed = 20
-ball_speed = 2
-
-class Initial_Sprite(pygame.sprite.Sprite):
-
-    def __init__(self, image_file):
-        pygame.sprite.Sprite.__init__(self)
-
-    
-        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/ball.bmp')
-        self.image.set_colorkey((255, 255, 255))
-        self.rect = self.image.get_rect()
-
-class Player(Initial_Sprite):
-
-    def __init__(self, image_file):
-        Initial_Sprite.__init__(self, image_file)
-        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/player.bmp')
-        self.rect.bottom = window_height
-        self.rect.left = (window_width - self.image.get_width()) / 2
-
-    def move_left(self):
-        if self.rect.left > 0:
-            self.rect.move_ip(-player_speed, 0)
-
-    def move_right(self):
-        if self.rect.right < window_width:
-            self.rect.move_ip(player_speed, 0)
-
-class Brick(Initial_Sprite):
-  
-    def __init__(self, image_file, x, y):
-        Initial_Sprite.__init__(self, image_file)
-        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/brick.bmp')
-        self.rect.x, self.rect.y = x, y
-
-class Ball(Initial_Sprite):
-
-    def __init__(self, image_file, speed_x, speed_y):
-        Initial_Sprite.__init__(self, image_file)
-        self.rect.bottom = window_height - player_height
-        self.image = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/ball.bmp')
-        self.rect.left = window_width / 2
-        self.speed_x = speed_x
-        self.speed_y = speed_y
-
-    def update(self):
-        self.rect = self.rect.move(self.speed_x, self.speed_y)
-
-        if self.rect.x > window_width - self.image.get_width() or self.rect.x < 0:
-            self.speed_x *= -1
-        if self.rect.y < 0:
-            self.speed_y *= -1
+WIDTH = 480
+HEIGHT = 680
+game_speed = 40
 
 
 pygame.init()
-window = pygame.display.set_mode((window_width, window_height))
-pygame.key.set_repeat(400, 30)
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
-score = 0
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = WIDTH / 2
+        self.rect.bottom = HEIGHT - 10
+        self.speedx = 0
+    
+    def update(self):
+        self.speedx = 0
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_LEFT]:
+            self.speedx = -5
+        if keystate[pygame.K_RIGHT]:
+            self.speedx = 5
+        self.rect.x += self.speedx
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.left < 0: 
+            self.rect.left = 0
+
+    def shoot(self):
+        bullet = Bullet(self.rect.centerx, self.rect.top)
+        all_sprites.add(bullet)
+        bullet_group.add(bullet)
 
 
-all_sprites_group = pygame.sprite.Group()
+class Objects(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = object_img
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-100, -40)
+        self.speedy = random.randrange(2, 15)
+        self.speedx = random.randrange(-3, 3)
+    
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(1, 8)
 
-player_bricks_group = pygame.sprite.Group()
-bricks_group = pygame.sprite.Group()
-
-player_ball_group = pygame.sprite.Group()
-
-
-ball = Ball('ball.png', ball_speed, -ball_speed)
-all_sprites_group.add(ball)
-
-player_ball_group.add(ball)
-
-player = Player('player.bmp')
-all_sprites_group.add(player)
-player_bricks_group.add(player)
-
-player_ball_group.add(player)
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = bullet_img
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = y
+        self.rect.centerx = x
+        self.speedy = -10
+    
+    def update(self):
+        self.rect.y += self.speedy
+        if self.rect.bottom < 0:
+            self.kill()
 
 
+player_img = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/player.bmp')
+bullet_img = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/ball.bmp')
+object_img = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/object.bmp')
+background_img = pygame.image.load('/Users/samaragould/Desktop/206/Project4/images/background.bmp')
+background_rect = background_img.get_rect()
 
+all_sprites = pygame.sprite.Group()
+object_group = pygame.sprite.Group()
+bullet_group = pygame.sprite.Group()
+player  = Player()
+all_sprites.add(player)
 
 for i in range(8):
-    for j in range(8):
-        brick = Brick('brick.bmp', (i+1)*brick_width + 5, (j+3)*brick_height + 5)
-        all_sprites_group.add(brick)
-        bricks_group.add(brick)
-        player_bricks_group.add(brick)
+    n = Objects()
+    all_sprites.add(n)
+    object_group.add(n)
 
 
-while True:
 
-    if ball.rect.y > window_height:
-        print ('Game Over')
-        pygame.quit()
-        sys.exit()
+score = 0
 
- 
+play = True 
+
+while play: 
+    clock.tick(game_speed)
     for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == KEYDOWN:
-            if event.key == K_LEFT:
-                player.move_left()
-            elif event.key == K_RIGHT:
-                player.move_right()
+        
+        if event.type == pygame.QUIT:
+            play = False   
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
+            
+	
 
-    
-    hits = pygame.sprite.spritecollide(ball, player_bricks_group, False)
-    
 
-    
+
+    all_sprites.update()
+
+    hits = pygame.sprite.groupcollide(object_group, bullet_group, True, True)
+    for hit in hits:
+        score += len(hits)
+        sound = pygame.mixer.Sound('alert.wav')
+        sound.play()
+        print ("Score: %s" % score)
+        n = Objects()
+        all_sprites.add(n)
+        object_group.add(n)
+
+
+
+    hits = pygame.sprite.spritecollide(player, object_group, False)
     if hits:
-        hit_rect = hits[0].rect
-
-        if hit_rect.left > ball.rect.left or ball.rect.right < hit_rect.right:
-            ball.speed_y *= -1
-        else:
-            ball.speed_x *= -1
-
-        if pygame.sprite.spritecollide(ball, bricks_group, True):
-            score += len(hits)
-            sound = pygame.mixer.Sound('alert.wav')
-            sound.play()
-            print ("Score: %s" % score)
+        print ('Final Score: ', score)
+        print ('Game Over :(')
+        play = False
 
 
-    window.fill((0, 0, 0))
-    all_sprites_group.draw(window)
 
-    
-    all_sprites_group.update()
-    player_hits = pygame.sprite.spritecollide(ball, all_sprites_group, True)
-    if player_hits:
-        player_hit_rect = player_hits[0].rect
-        if player_hit_rect.left > ball.rect.left or ball.rect.right < player_hit_rect.right:
-            ball.speed_y *= 1
-        else:
-            ball.speed_x *= 1
+    screen.fill((0, 0, 0))
+    screen.blit(background_img, background_rect)
 
-    clock.tick(60)
+    all_sprites.draw(screen)
     pygame.display.flip()
+
+pygame.quit()
